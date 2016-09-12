@@ -43,12 +43,14 @@ module.exports = {
     Get: function* Get_Enroll() {
         const {r, mock} = this
         const {id} = this.params
+        const {committee} = this.query
+        const fields = ['id', 'school', 'quote', ... (committee ? ['committee'] : []) ]
         this.status = 200
         this.body   = mock
                     ? MOCK_ENROLL_LIST
                     : yield r.table('enroll')
                             .orderBy({index: r.desc('submission_time')})
-                            .pluck('id', 'school', 'quote', 'committee')
+                            .pluck( ...fields )
     },
     GetId: function* Get_Enroll_Id() {
         const {r, mock} = this
