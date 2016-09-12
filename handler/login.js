@@ -61,7 +61,7 @@ module.exports = {
         }
 
         try {
-            this.token = decode(tokenStr, this.JWT_SECRET)
+            this.token = verify(tokenStr, this.JWT_SECRET)
             if (!this.token)
                 throw new Error('Token invalid or expired')
             
