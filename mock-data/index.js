@@ -36,6 +36,18 @@ module.exports = {
             school: 'test-school',
             quote: 4,
             committee: MOCK_COMMITTEE
+        },
+        {
+            id: 'test-schoool-2',
+            school: 'test-school-2',
+            quote: 4,
+            committee: MOCK_COMMITTEE
+        },
+        {
+            id: 'test-schoool-3',
+            school: 'test-school-3',
+            quote: 4,
+            committee: MOCK_COMMITTEE
         }
     ],
     MOCK_ADMIN_CRED: {
