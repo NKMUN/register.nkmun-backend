@@ -25,9 +25,14 @@ module.exports = {
         gender:    'm',
         phone:     '13800000000',
         email:     'darkphoo@example.com',
-        quote:     4,
+        'quote_cn':      4,
+        'quote_en':      4,
+        'quote_press':   4,
+        'quote_linkage': 4,
         'ac_paper.0': '学术水平测试答案0\n啊啊啊啊啊啊啊啊\n啊啊啊啊啊啊啊',
         'ac_paper.1': '学术水平测试答案1\n啊啊啊啊啊啊啊啊\n啊啊啊啊啊啊啊',
+        'ac_paper.2': '学术水平测试答案1\n啊啊啊啊啊啊啊啊\n啊啊啊啊啊啊啊',
+        'ac_paper.3': '学术水平测试答案1\n啊啊啊啊啊啊啊啊\n啊啊啊啊啊啊啊',
         committee: MOCK_COMMITTEE
     },
     MOCK_ENROLL_LIST: [
