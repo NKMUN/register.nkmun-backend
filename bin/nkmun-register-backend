@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+const Server = require('../server')
+
+const program = require('commander')
+const {createWriteStream} = require('fs')
+const {resolve} = require('path')
+
+function pathToStream(path) {
+    path = path
+    if (path === '-')
+        return process.stdout
+    else
+        return createWriteStream( resolve(__dirname, path), {flags: 'a'} )
+}
+
+program
+  .version('0.1.0')
+  .option('--mock', 'Run in mock mode')
+  .option('-p, --port [port]', 'Port to bind, default: 8001', parseInt)
+  .option('-h, --addr [addr]', 'Host address to bind, default: all addresses')
+  .option('-a, --access-log [file]',  'Access log file, default: access.log', pathToStream)
+  .option('-l, --log [file]', 'Log file, default: [stdout]', pathToStream)
+  .parse(process.argv)
+
+// server startup params
+let {
+    mock = false,
+    port = 8001,
+    host = undefined,
+    accessLog = pathToStream('access.log'),
+    log = process.stdout
+} = program
+
+Server.create({ mock, port, host, accessLog, log })
