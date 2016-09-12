@@ -63,6 +63,7 @@ function createApp({ mock, accessLog, dbHost, dbPort=28015}) {
     admins.get( '/enroll',     Handler.Enroll.Get )
     admins.get( '/enroll/:id', Handler.Enroll.GetId )
     admins.post('/enroll/:id', Handler.Enroll.PostId )
+    admins.post('/action',     Handler.Action.Post )
 
     app.use( publics.routes() )
     app.use( admins.routes() ) 
