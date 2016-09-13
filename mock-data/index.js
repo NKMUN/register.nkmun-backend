@@ -58,5 +58,9 @@ module.exports = {
     MOCK_ADMIN_CRED: {
         id:     'mock_admin',
         access: 'admin'
+    },
+    MOCK_VERIFIED_INVITATION: {
+        school:     'test-school',
+        invitation: 'abcdefg'
     }
 }
