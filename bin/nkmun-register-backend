@@ -18,7 +18,7 @@ program
   .version('0.1.0')
   .option('--mock', 'Run in mock mode')
   .option('-p, --port [port]', 'Port to bind, default: 8001', parseInt)
-  .option('-h, --addr [addr]', 'Host address to bind, default: all addresses')
+  .option('-h, --host [addr]', 'Host address to bind, default: all addresses')
   .option('-a, --access-log [file]',  'Access log file, default: access.log', pathToStream)
   .option('-l, --log [file]', 'Log file, default: [stdout]', pathToStream)
   .option('--db-host [host], Database host, default 127.0.0.1')
