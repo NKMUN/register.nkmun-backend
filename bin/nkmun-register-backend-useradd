@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+'use strict'
+
+const program = require('commander')
+const r = require('rethinkdb')
+const co = require('co')
+const {derive} = require('../lib/password-util')
+
+program
+    .version('0.1.0')
+    .usage('[options] username')
+    .option('--mock', 'Run in mock mode')
+    .option('--db-host [host], Database host, default 127.0.0.1')
+    .option('--db-port [port], Database port, default 28015', parseInt)
+    .option('-a, --access', 'Access level, default: "admin"')
+    .parse(process.argv)
+
+const {
+    mock = false,
+    dbHost = '127.0.0.1',
+    dbPort = 28015,
+    dbName = 'nkmun',
+    access = 'admin'
+} = program
+
+const username = program.args[0]
+const prompt = require('password-prompt')
+
+if (!username) {
+    process.stderr.write('Wrong usage, type --help for help\n')
+    process.stderr.write('Usage: [options] username\n')
+    process.exit(1)
+} else {
+    co( function*() {
+        let conn = yield r.connect({
+            host: dbHost,
+            port: dbPort,
+            db:   dbName
+        })
+        let password = yield prompt('Password: ')
+        let {salt, hash} = derive(password)
+        let {inserted} = yield r.table('user').insert({
+            id: username,
+            salt,
+            hash,
+            access
+        }, {
+          conflict: 'update'
+        }).run(conn)
+
+        process.stderr.write(`User ${username} ${inserted ? 'Inserted' : 'Updated'}\n`)
+    })
+    .then( () => process.exit(0) )
+    .catch( (err) => {
+        process.stderr.write(err.message+'\n')
+    })
+}

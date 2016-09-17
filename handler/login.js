@@ -5,6 +5,7 @@ const {sign, verify, decode} = require('jsonwebtoken')
 const AUTHORIZATION_PREFIX = 'Bearer '
 const {MOCK_ADMIN_CRED} = require('../mock-data')
 const JWT_OPTS = { expiresIn: '7d' }
+const {derive, verify: verifyPassword} = require('../lib/password-util')
 
 module.exports = {
     Get: function* Get_Login() {
@@ -28,11 +29,21 @@ module.exports = {
         const {r, mock, request, JWT_SECRET} = this
         let {user, password} = this.is('multipart') ? request.body.fields : request.body
 
-        let success = mock 
-                    ? (user==='ok' ? true : false)
-                    : yield r.table('user').get(user).default({})('password').eq(password)
+        let {salt, hash} = mock
+                         ? {salt: 'mock', hash: 'mock'}
+                         : yield r.table('user').get(user).default({}).pluck('hash', 'salt')
 
-        if (!success) {
+        if (!salt || !hash) {
+            this.status = 403
+            this.body   = { status: false, message: 'User does not exist' }
+            return
+        }
+
+        let passwordCorrect = mock
+                            ? (user==='ok' ? true : false)
+                            : verifyPassword(password, salt, hash)
+
+        if (!passwordCorrect) {
             this.status = 403
             this.body   = { status: false, message: 'Invalid username / password' }
             return
