@@ -40,7 +40,7 @@ function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015}) {
         error(err.stack)
         if ( err.message.indexOf('REQLDriver') ) {
             // reset db connection
-            app.context.r = createDBConnection(dhHost, dbPort)
+            app.context.r = createDBConnection(dbHost, dbPort)
         }
     })
 
