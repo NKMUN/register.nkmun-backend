@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+
+'use strict'
+
+const program = require('commander')
+const co = require('co')
+const {red, yellow, green} = require('chalk')
+const r = require('rethinkdb')
+
+const FAIL = red('Fail')
+const OK   = green(' OK ')
+const WARN = yellow('Warn')
+
+const log = (str) => process.stdout.write(str+'\n')
+
+program
+    .version('0.1.0')
+    .option('--mock', 'Run in mock mode')
+    .option('--db-host [host], Database host, default 127.0.0.1')
+    .option('--db-port [port], Database port, default 28015', parseInt)
+    .parse(process.argv)
+
+const {
+    mock = false,
+    dbHost = '127.0.0.1',
+    dbPort = 28015,
+    dbName = 'nkmun'
+} = program
+
+function OP(hint, query, conn, ...expects) {
+    return query.run(conn)
+    .then( (result) => {
+        for (let expect of expects)
+            if (result[expect])
+                return true
+        return false
+    })
+    .then( (expected) => {
+        if (expected)
+            log(`${OK} ${hint} initialized`)
+        else
+            log(`${FAIL} ${hint} unexpected result`)
+    })
+    .catch( (err) => {
+        log(`${WARN} ${hint} already exists?`)
+    })
+}
+
+if (mock) {
+    log('Mock mode does nothing!\n')
+    log('Exiting!\n')
+    process.exit(0)
+}else{
+    log(`Initializing ${dbName} database on ${dbHost} ${dbPort}`)
+    co( function* Initialize_NKMUN_Database(){
+        let conn = yield r.connect({
+           host: dbHost,
+           port: dbPort,
+           db:   dbName
+        })
+
+        let result
+
+        log('Creating database')
+        yield OP(`${dbName} database`, r.dbCreate(dbName), conn, 'dbs_created')
+
+        log('Creating tables')
+        yield OP('user table', r.tableCreate('user'), conn, 'tables_created')
+        yield OP('enroll table', r.tableCreate('user'), conn, 'tables_created')
+
+        log('Creating secondary indexes')
+        yield OP('index enroll/submission_time', r.table('enroll').indexCreate('submission_time'), conn, 'created')
+    })
+    .then( ()=>{
+        log(`${OK} All done`)
+        process.exit(0)
+    })
+}
