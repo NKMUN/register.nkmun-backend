@@ -3,7 +3,7 @@
 const {sign, verify, decode} = require('jsonwebtoken')
 
 const AUTHORIZATION_PREFIX = 'Bearer '
-const MOCK_ADMIN_CRED = require('../mock-data')
+const {MOCK_ADMIN_CRED} = require('../mock-data')
 const JWT_OPTS = { expiresIn: '7d' }
 
 module.exports = {
@@ -39,7 +39,7 @@ module.exports = {
         }
 
         let cred = mock 
-                 ? MOCK_CRED
+                 ? MOCK_ADMIN_CRED
                  : yield r.table('user').get(user).pluck('id', 'access')
         
         let token = sign(cred, JWT_SECRET)
@@ -64,7 +64,6 @@ module.exports = {
             this.token = verify(tokenStr, this.JWT_SECRET)
             if (!this.token)
                 throw new Error('Token invalid or expired')
-            
         }catch(e){
             this.status = 401
             this.body   = { status: false, message: e.message }
