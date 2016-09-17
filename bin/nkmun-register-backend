@@ -21,6 +21,8 @@ program
   .option('-h, --addr [addr]', 'Host address to bind, default: all addresses')
   .option('-a, --access-log [file]',  'Access log file, default: access.log', pathToStream)
   .option('-l, --log [file]', 'Log file, default: [stdout]', pathToStream)
+  .option('--db-host [host], Database host, default 127.0.0.1')
+  .option('--db-port [port], Database port, default 28015', parseInt)
   .parse(process.argv)
 
 // server startup params
@@ -29,7 +31,9 @@ let {
     port = 8001,
     host = undefined,
     accessLog = pathToStream('access.log'),
-    log = process.stdout
+    log = process.stdout,
+    dbHost = '127.0.0.1',
+    dbPort = 28015
 } = program
 
-Server.create({ mock, port, host, accessLog, log })
+Server.create({ mock, port, host, accessLog, log, dbHost, dbPort })
