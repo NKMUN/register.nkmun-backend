@@ -52,7 +52,6 @@ describe('jwt login', function() {
             }
         }, (err, res, body)=>{
             strictEqual(403, res.statusCode, 'status = 403')
-            token = body.token
             done()
         })
     })
