@@ -13,22 +13,20 @@ const devNull = require('dev-null')
 
 const Handler = require('./handler')
 
-const dbHost = '192.168.1.77'
-const dbPort = 28015
 const JWT_SECRET = 'jwt-secret'
 
 function createDBConnection(dbHost, dbPort) {
     return require('rethinkdbdash')({
         host:   dbHost,
         port:   dbPort,
-        db:     'register-nkmun',
+        db:     'nkmun',
         pool:   true,
         max:    5,
         cursor: false
     })
 }
 
-function createApp({ mock, accessLog, dbHost, dbPort=28015}) {
+function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015}) {
     const app = require('koa')()
 
     app.context.JWT_SECRET = JWT_SECRET 
@@ -51,8 +49,8 @@ function createApp({ mock, accessLog, dbHost, dbPort=28015}) {
 
     // Public Router
     let publics = new Router()
-    publics.post('/reset',  Handler.Reset.Post)
     publics.post('/enroll', Handler.Enroll.Post)
+    publics.get( '/enroll', Handler.Enroll.Get )
     publics.get( '/login',  Handler.Login.Router, Handler.Login.Get)
     publics.post('/login',  Handler.Login.Post)
     publics.get( '/disclaimer', Handler.Disclaimer.Get)
@@ -75,7 +73,7 @@ function createApp({ mock, accessLog, dbHost, dbPort=28015}) {
 }
 
 module.exports = {
-    create({ mock = false, port = 8001, host, accessLog, log }) {
+    create({ mock = false, port = 8001, host, accessLog, log, dbHost, dbPort }) {
         winston.add( winston.transports.File, {
             colorize: log === process.stdout,
             json:     false,
