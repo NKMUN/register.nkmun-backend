@@ -10,6 +10,8 @@ module.exports = {
         data.submission_time = mock
                             ? (new Date()).getTime() / 1000
                             : r.now().toEpochTime()
+        if (data.school)
+            data.id = data.school
 
         let {inserted} = mock
                     ? ( data.school==='duplicate' ? {inserted:0} : {inserted:1} )
