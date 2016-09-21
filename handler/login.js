@@ -53,7 +53,7 @@ module.exports = {
                  ? MOCK_ADMIN_CRED
                  : yield r.table('user').get(user).pluck('id', 'access')
         
-        let token = sign(cred, JWT_SECRET)
+        let token = sign(cred, JWT_SECRET, JWT_OPTS)
 
         this.status = 200
         this.body   = { status: true, token, cred }
