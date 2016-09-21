@@ -13,8 +13,6 @@ const devNull = require('dev-null')
 
 const Handler = require('./handler')
 
-const JWT_SECRET = 'jwt-secret'
-
 function createDBConnection(dbHost, dbPort) {
     return require('rethinkdbdash')({
         host:   dbHost,
@@ -26,10 +24,10 @@ function createDBConnection(dbHost, dbPort) {
     })
 }
 
-function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015}) {
+function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='secret'}) {
     const app = require('koa')()
 
-    app.context.JWT_SECRET = JWT_SECRET 
+    app.context.JWT_SECRET = secret
     app.context.mock = mock
     if (mock)
         warn(red('Running in mock mode'))
@@ -73,7 +71,7 @@ function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015}) {
 }
 
 module.exports = {
-    create({ mock = false, port = 8001, host, accessLog, log, dbHost, dbPort }) {
+    create({ mock = false, port = 8001, host, accessLog, log, dbHost, dbPort, secret }) {
         winston.add( winston.transports.File, {
             colorize: log === process.stdout,
             json:     false,
@@ -85,7 +83,8 @@ module.exports = {
             accessLog: accessLog ? accessLog: devNull(),
             mock,
             dbHost,
-            dbPort
+            dbPort,
+            secret
         })
 
         let server = createServer( app.callback() )

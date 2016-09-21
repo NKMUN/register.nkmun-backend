@@ -21,8 +21,9 @@ program
   .option('-h, --host [addr]', 'Host address to bind, default: all addresses')
   .option('-a, --access-log [file]',  'Access log file, default: access.log', pathToStream)
   .option('-l, --log [file]', 'Log file, default: [stdout]', pathToStream)
-  .option('--db-host [host], Database host, default 127.0.0.1')
-  .option('--db-port [port], Database port, default 28015', parseInt)
+  .option('--db-host [host]', 'Database host, default 127.0.0.1')
+  .option('--db-port [port]', 'Database port, default 28015', parseInt)
+  .option('-s, --secret [secret]', 'Secret used to sign/verify JWT, set this in production')
   .parse(process.argv)
 
 // server startup params
@@ -33,7 +34,8 @@ let {
     accessLog = pathToStream('access.log'),
     log = process.stdout,
     dbHost = '127.0.0.1',
-    dbPort = 28015
+    dbPort = 28015,
+    secret = 'secret'
 } = program
 
-Server.create({ mock, port, host, accessLog, log, dbHost, dbPort })
+Server.create({ mock, port, host, accessLog, log, dbHost, dbPort, secret })
