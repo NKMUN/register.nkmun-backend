@@ -13,7 +13,9 @@ const MOCK_COMMITTEE = {
     loc_en_5: 1,
     loc_media: 1,
     loc_biz: 1,
-    loc_link: 1
+    loc_link: 1,
+    loc_superv: 1,
+    loc_observer: 1
 }
 
 module.exports = {
@@ -29,6 +31,8 @@ module.exports = {
         'quote_en':      4,
         'quote_press':   4,
         'quote_linkage': 4,
+        'quote_superv':  1,
+        'quote_observer':1,
         'ac_paper.0': '学术水平测试答案0\n啊啊啊啊啊啊啊啊\n啊啊啊啊啊啊啊',
         'ac_paper.1': '学术水平测试答案1\n啊啊啊啊啊啊啊啊\n啊啊啊啊啊啊啊',
         'ac_paper.2': '学术水平测试答案1\n啊啊啊啊啊啊啊啊\n啊啊啊啊啊啊啊',
