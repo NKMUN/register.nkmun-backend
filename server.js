@@ -47,10 +47,10 @@ function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='
 
     // Public Router
     let publics = new Router()
-    publics.post('/enroll', Handler.Enroll.Post)
+    publics.post('/enroll', Handler.Enroll.Post )
     publics.get( '/enroll', Handler.Enroll.Get )
-    publics.get( '/login',  Handler.Login.Router, Handler.Login.Get)
-    publics.post('/login',  Handler.Login.Post)
+    publics.get( '/login',  Handler.Login.Router, Handler.Login.Get )
+    publics.post('/login',  Handler.Login.Post )
     // publics.get( '/disclaimer', Handler.Disclaimer.Get)
     // publics.get( '/invitation/:invitation', Handler.Invitation.Get)
     // publics.post('/leader', Handler.Leader.Post)
