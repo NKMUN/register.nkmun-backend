@@ -31,11 +31,13 @@
     "koa-body": "^1.5.0",
     "koa-route": "^2.4.2",
     "koa-router": "^5.4.0",
+    "nodemailer": "^2.6.0",
     "password-prompt": "^1.0.2",
     "pretty-ms": "^2.1.0",
     "random-js": "^1.0.8",
     "rethinkdb": "^2.3.3",
     "rethinkdbdash": "^2.3.21",
+    "shortid": "^2.2.6",
     "winston": "^2.2.0"
   },
   "devDependencies": {

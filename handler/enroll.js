@@ -29,6 +29,9 @@ module.exports = {
         const {r, mock, request} = this
         let data = this.is('multipart') ? request.body.fields : request.body
 
+        if (data.state)    // state should not be updated
+            delete data.state
+
         let {replaced} = mock
                        ? {replaced: 1}
                        : yield r.table('enroll').get(this.params.id).update(data)
@@ -40,13 +43,12 @@ module.exports = {
             this.status = 404
             this.body   = { status: false, message: 'entry does not exist' }
         }
-
     },
     Get: function* Get_Enroll() {
         const {r, mock} = this
         const {id} = this.params
         const {committee} = this.query
-        const fields = ['id', 'school', 'quote', ... (committee ? ['committee'] : []) ]
+        const fields = ['id', 'school', 'quote', 'state', ... (committee ? ['committee'] : []) ]
         this.status = 200
         this.body   = mock
                     ? MOCK_ENROLL_LIST

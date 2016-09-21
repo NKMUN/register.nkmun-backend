@@ -66,5 +66,9 @@ module.exports = {
     MOCK_VERIFIED_INVITATION: {
         school:     'test-school',
         invitation: 'abcdefg'
+    },
+    MOCK_LEADER_CONTACT: {
+        name:  'test-leader',
+        email: 'test@nkmun.cn'
     }
 }

@@ -10,8 +10,11 @@ const {red, blue, green} = require('chalk')
 const accesslog = require('koa-accesslog')
 const koaBody = require('koa-body')
 const devNull = require('dev-null')
+const Mailer = require('nodemailer')
 
 const Handler = require('./handler')
+
+const NOTICE_MAIL_FROM = '2017@nkmun.cn'
 
 function createDBConnection(dbHost, dbPort) {
     return require('rethinkdbdash')({
@@ -24,10 +27,12 @@ function createDBConnection(dbHost, dbPort) {
     })
 }
 
-function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='secret'}) {
+function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='secret', mailer}) {
     const app = require('koa')()
 
     app.context.JWT_SECRET = secret
+    app.context.MAILER = mailer
+    app.context.NOTICE_MAIL_FROM = NOTICE_MAIL_FROM
     app.context.mock = mock
     if (mock)
         warn(red('Running in mock mode'))
@@ -63,6 +68,8 @@ function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='
     admins.get( '/enroll/:id', Handler.Enroll.GetId )
     admins.post('/enroll/:id', Handler.Enroll.PostId )
     admins.post('/action',     Handler.Action.Post )
+    admins.post('/invitation', Handler.Invitation.Post )
+    admins.post('/pending',    Handler.Pending.Post )
 
     app.use( publics.routes() )
     app.use( admins.routes() ) 
@@ -71,7 +78,11 @@ function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='
 }
 
 module.exports = {
-    create({ mock = false, port = 8001, host, accessLog, log, dbHost, dbPort, secret }) {
+    create({ mock = false, port = 8001, host, accessLog, log,
+             dbHost, dbPort,
+             secret,
+             smtpAccount, smtpPassword, smtpServer, smtpPort=465
+    }) {
         winston.add( winston.transports.File, {
             colorize: log === process.stdout,
             json:     false,
@@ -79,12 +90,27 @@ module.exports = {
         })
         winston.remove( winston.transports.Console )
 
+        let mailer
+        if (smtpAccount && smtpPassword && smtpServer) {
+            mailer = Mailer.createTransport({
+                host: smtpServer,
+                port: smtpPort,
+                secure: true,
+                pool: true,
+                auth: {
+                    user: smtpAccount,
+                    pass: smtpPassword
+                }
+            })
+        }
+
         let app = createApp({
             accessLog: accessLog ? accessLog: devNull(),
             mock,
             dbHost,
             dbPort,
-            secret
+            secret,
+            mailer
         })
 
         let server = createServer( app.callback() )

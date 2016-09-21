@@ -24,6 +24,10 @@ program
   .option('--db-host [host]', 'Database host, default 127.0.0.1')
   .option('--db-port [port]', 'Database port, default 28015', parseInt)
   .option('-s, --secret [secret]', 'Secret used to sign/verify JWT, set this in production')
+  .option('--smtp-account [mail]', 'Email account to send notice')
+  .option('--smtp-password [password]', 'Email account password to send notice')
+  .option('--smtp-host [host]', 'SMTP server used to send notice')
+  .option('--smtp-port')
   .parse(process.argv)
 
 // server startup params
@@ -35,7 +39,11 @@ let {
     log = process.stdout,
     dbHost = '127.0.0.1',
     dbPort = 28015,
-    secret = 'secret'
+    secret = 'secret',
+    smtpAccount,
+    smtpPassword,
+    smtpHost,
+    smtpPort = 25
 } = program
 
-Server.create({ mock, port, host, accessLog, log, dbHost, dbPort, secret })
+Server.create({ mock, port, host, accessLog, log, dbHost, dbPort, secret, smtpAccount, smtpPassword, smtpHost, smtpPort })
