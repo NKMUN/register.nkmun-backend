@@ -63,6 +63,10 @@ module.exports = {
         id:     'mock_admin',
         access: 'admin'
     },
+    MOCK_LEADER_CRED: {
+        id:     'mock_leader',
+        access: 'leader'
+    },
     MOCK_VERIFIED_INVITATION: {
         school:     'test-school',
         invitation: 'abcdefg'

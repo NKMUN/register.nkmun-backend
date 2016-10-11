@@ -32,11 +32,14 @@ module.exports = {
         if (data.state)    // state should not be updated
             delete data.state
 
-        let {replaced} = mock
-                       ? {replaced: 1}
-                       : yield r.table('enroll').get(this.params.id).update(data)
+        let {
+            replaced,
+            unchanged
+        } = mock
+          ? {replaced: 1}
+          : yield r.table('enroll').get(this.params.id).update(data)
         
-        if (replaced) {
+        if (replaced || unchanged) {
             this.status = 202
             this.body   = { status: true, message: 'updated' }
         }else{

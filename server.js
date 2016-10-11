@@ -27,12 +27,21 @@ function createDBConnection(dbHost, dbPort) {
     })
 }
 
-function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='secret', mailer}) {
+function createApp({
+    mock,
+    accessLog,
+    dbHost='127.0.0.1',
+    dbPort=28015,
+    secret='secret',
+    mailer,
+    smtpAccount,
+    smtpNick
+}) {
     const app = require('koa')()
 
     app.context.JWT_SECRET = secret
-    app.context.MAILER = mailer
-    app.context.NOTICE_MAIL_FROM = NOTICE_MAIL_FROM
+    app.context.NOTICE_MAIL_FROM = smtpNick ? `"${smtpNick}" <${smtpAccount}>` : smtpAccount
+    app.context.mailer = mailer
     app.context.mock = mock
     if (mock)
         warn(red('Running in mock mode'))
@@ -60,18 +69,24 @@ function createApp({ mock, accessLog, dbHost='127.0.0.1', dbPort=28015, secret='
     publics.get( '/invitation/:invitation', Handler.Invitation.Get)
     publics.post('/leader', Handler.Leader.Post)
 
+    // Leader Router
+    let leaders = new Router()
+    let HasLeaderAccess = Handler.Login.HasAccess('leader')
+    leaders.get( '/leader', HasLeaderAccess, Handler.Leader.Get )
+
     // Admin Router
     let admins = new Router()
-    admins.use( Handler.Login.Router )
-    admins.use( Handler.Login.HasAccess('admin') )
-    admins.get( '/enroll',     Handler.Enroll.Get )
-    admins.get( '/enroll/:id', Handler.Enroll.GetId )
-    admins.post('/enroll/:id', Handler.Enroll.PostId )
-    admins.post('/action',     Handler.Action.Post )
-    admins.post('/invitation', Handler.Invitation.Post )
-    admins.post('/pending',    Handler.Pending.Post )
+    let HasAdminAccess = Handler.Login.HasAccess('admin')
+    admins.get( '/enroll',     HasAdminAccess, Handler.Enroll.Get )
+    admins.get( '/enroll/:id', HasAdminAccess, Handler.Enroll.GetId )
+    admins.post('/enroll/:id', HasAdminAccess, Handler.Enroll.PostId )
+    admins.post('/action',     HasAdminAccess, Handler.Action.Post )
+    admins.post('/invitation', HasAdminAccess, Handler.Invitation.Post )
+    admins.post('/pending',    HasAdminAccess, Handler.Pending.Post )
 
     app.use( publics.routes() )
+    app.use( Handler.Login.Router )
+    app.use( leaders.routes() )
     app.use( admins.routes() ) 
 
     return app
@@ -81,7 +96,7 @@ module.exports = {
     create({ mock = false, port = 8001, host, accessLog, log,
              dbHost, dbPort,
              secret,
-             smtpAccount, smtpPassword, smtpServer, smtpPort=465
+             smtpAccount, smtpNick, smtpPassword, smtpHost, smtpPort=465
     }) {
         winston.add( winston.transports.File, {
             colorize: log === process.stdout,
@@ -91,9 +106,9 @@ module.exports = {
         winston.remove( winston.transports.Console )
 
         let mailer
-        if (smtpAccount && smtpPassword && smtpServer) {
+        if (smtpAccount && smtpPassword && smtpHost) {
             mailer = Mailer.createTransport({
-                host: smtpServer,
+                host: smtpHost,
                 port: smtpPort,
                 secure: true,
                 pool: true,
@@ -110,7 +125,9 @@ module.exports = {
             dbHost,
             dbPort,
             secret,
-            mailer
+            mailer,
+            smtpAccount,
+            smtpNick
         })
 
         let server = createServer( app.callback() )

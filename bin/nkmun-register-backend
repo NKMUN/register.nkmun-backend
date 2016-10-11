@@ -27,6 +27,7 @@ program
   .option('--smtp-account [mail]', 'Email account to send notice')
   .option('--smtp-password [password]', 'Email account password to send notice')
   .option('--smtp-host [host]', 'SMTP server used to send notice')
+  .option('--smtp-nick [name]', 'SMTP account nickname')
   .option('--smtp-port')
   .parse(process.argv)
 
@@ -43,7 +44,8 @@ let {
     smtpAccount,
     smtpPassword,
     smtpHost,
-    smtpPort = 25
+    smtpNick,
+    smtpPort = 465
 } = program
 
 Server.create({ mock, port, host, accessLog, log, dbHost, dbPort, secret, smtpAccount, smtpPassword, smtpHost, smtpPort })

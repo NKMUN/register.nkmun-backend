@@ -22,14 +22,18 @@ module.exports = {
 
         let result = mock
                    ? MOCK_VERIFIED_INVITATION
-                   : r.table('enroll').get(invitation, {index: 'invitation'})
+                   : yield r.table('enroll').getAll(invitation, {index: 'invitation'})
+                           .pluck('school', 'invitation')
 
-        if (result) {
+        if (result.length === 1) {
             this.status = 200
-            this.body   = result 
-        }else{
+            this.body   = result[0]
+        } else if (result.length === 0) {
             this.status = 404
             this.body   = { status: false }
+        } else {
+            this.status = 409
+            this.body   = { status: false, message: 'Multiple schools with same invitation, please contact staff!' }
         }
     },
     Post: function* Handler_Post_Invitation() {
@@ -58,9 +62,13 @@ module.exports = {
         }
 
         if (!state || state === 'inviting' || state === 'pending') {
-            let {replaced} = mock
-                           ? { replaced: 1 }
-                           : yield r.table('enroll').get(id).update({ state: 'inviting' })
+            let code = generateInvitationCode()
+
+            let {
+                replaced
+            } = mock
+              ? { replaced: 1 }
+              : yield r.table('enroll').get(id).update({ state: 'inviting', invitation: code })
 
             if (!replaced) {
                 this.status = 500
@@ -68,11 +76,7 @@ module.exports = {
                 return
             }
 
-            let info, html = createInvitationMail({
-                school,
-                name,
-                code: generateInvitationCode()
-            })
+            let info, html = createInvitationMail({ school, name, code })
 
             try {
                 let mailOpts = {

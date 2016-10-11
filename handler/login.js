@@ -3,9 +3,9 @@
 const {sign, verify, decode} = require('jsonwebtoken')
 
 const AUTHORIZATION_PREFIX = 'Bearer '
-const {MOCK_ADMIN_CRED} = require('../mock-data')
+const { MOCK_ADMIN_CRED, MOCK_LEADER_CRED } = require('../mock-data')
+const { derive, verify: verifyPassword } = require('../lib/password-util')
 const JWT_OPTS = { expiresIn: '7d' }
-const {derive, verify: verifyPassword} = require('../lib/password-util')
 
 module.exports = {
     Get: function* Get_Login() {
@@ -40,7 +40,7 @@ module.exports = {
         }
 
         let passwordCorrect = mock
-                            ? (user==='ok' ? true : false)
+                            ? (user==='admin' || user==='leader' ? true : false)
                             : verifyPassword(password, salt, hash)
 
         if (!passwordCorrect) {
@@ -50,7 +50,7 @@ module.exports = {
         }
 
         let cred = mock 
-                 ? MOCK_ADMIN_CRED
+                 ? (user==='admin' ? MOCK_ADMIN_CRED : MOCK_LEADER_CRED)
                  : yield r.table('user').get(user).pluck('id', 'access')
         
         let token = sign(cred, JWT_SECRET, JWT_OPTS)
@@ -86,7 +86,7 @@ module.exports = {
     },
     HasAccess(accessStr) {
         return function* HasAccess_Login(next) {
-            let tokenAccessStr = this.token ? this.token.access || '' : '' 
+            let tokenAccessStr = this.token ? this.token.access || '' : ''
             if (!tokenAccessStr.includes(accessStr)) {
                 this.status = 403
                 this.body   = { status: false, message: 'Access denied'}

@@ -62,14 +62,20 @@ if (mock) {
         let result
 
         log('Creating database')
-        yield OP(`${dbName} database`, r.dbCreate(dbName), conn, 'dbs_created')
+        yield OP(dbName, r.dbCreate(dbName), conn, 'dbs_created')
 
         log('Creating tables')
-        yield OP('user table', r.tableCreate('user'), conn, 'tables_created')
-        yield OP('enroll table', r.tableCreate('enroll'), conn, 'tables_created')
+        yield OP('user',     r.tableCreate('user'),     conn, 'tables_created')
+        yield OP('enroll',   r.tableCreate('enroll'),   conn, 'tables_created')
+        yield OP('leader',   r.tableCreate('leader'),   conn, 'tables_created')
+        yield OP('exchange', r.tableCreate('exchange'), conn, 'tables_created')
+        yield OP('payment',  r.tableCreate('payment'),  conn, 'tables_created')
 
         log('Creating secondary indexes')
-        yield OP('index enroll/submission_time', r.table('enroll').indexCreate('submission_time'), conn, 'created')
+        yield OP('enroll/submission_time', r.table('enroll').indexCreate('submission_time'), conn, 'created')
+        yield OP('enroll/invitation',      r.table('enroll').indexCreate('invitation'),      conn, 'created')
+        yield OP('enroll/leader',          r.table('enroll').indexCreate('leader'),          conn, 'created')
+        yield OP('exchange/to',            r.table('exchange').indexCreate('to'),            conn, 'created')
     })
     .then( ()=>{
         log(`${OK} All done`)
