@@ -76,6 +76,7 @@ if (mock) {
         yield OP('enroll/invitation',      r.table('enroll').indexCreate('invitation'),      conn, 'created')
         yield OP('enroll/leader',          r.table('enroll').indexCreate('leader'),          conn, 'created')
         yield OP('exchange/to',            r.table('exchange').indexCreate('to'),            conn, 'created')
+        yield OP('exchange/from',          r.table('exchange').indexCreate('from'),          conn, 'created')
     })
     .then( ()=>{
         log(`${OK} All done`)

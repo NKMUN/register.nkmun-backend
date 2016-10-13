@@ -1,16 +1,16 @@
 const MOCK_COMMITTEE = {
-    loc_cn_1: 1,
-    loc_cn_2: 1,
-    loc_cn_3: 1,
-    loc_cn_4: 1,
+    loc_cn_1: 3,
+    loc_cn_2: 0,
+    loc_cn_3: 0,
+    loc_cn_4: 0,
     loc_cs_1: 1,
-    loc_cs_2: 1,
-    loc_cs_3: 1,
+    loc_cs_2: 0,
+    loc_cs_3: 0,
     loc_en_1: 1,
-    loc_en_2: 1,
-    loc_en_3: 1,
-    loc_en_4: 1,
-    loc_en_5: 1,
+    loc_en_2: 0,
+    loc_en_3: 0,
+    loc_en_4: 0,
+    loc_en_5: 0,
     loc_media: 1,
     loc_biz: 1,
     loc_link: 1,
@@ -65,7 +65,8 @@ module.exports = {
     },
     MOCK_LEADER_CRED: {
         id:     'mock_leader',
-        access: 'leader'
+        access: 'leader',
+        school: 'test-school'
     },
     MOCK_VERIFIED_INVITATION: {
         school:     'test-school',
@@ -74,5 +75,14 @@ module.exports = {
     MOCK_LEADER_CONTACT: {
         name:  'test-leader',
         email: 'test@nkmun.cn'
+    },
+    MOCK_EXCHANGE_REQUEST_ENTRY: {
+        id:   'exchange-id',
+        from: 'exchange-offerer',
+        to:   'test-school',
+        state:  'pending',
+        offer:  'loc_cn_1',
+        wanted: 'loc_en_1',
+        amount: 1
     }
 }

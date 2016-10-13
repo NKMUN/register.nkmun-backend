@@ -51,7 +51,7 @@ module.exports = {
 
         let cred = mock 
                  ? (user==='admin' ? MOCK_ADMIN_CRED : MOCK_LEADER_CRED)
-                 : yield r.table('user').get(user).pluck('id', 'access')
+                 : yield r.table('user').get(user).pluck('id', 'access', 'school')
         
         let token = sign(cred, JWT_SECRET, JWT_OPTS)
 
