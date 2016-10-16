@@ -59,6 +59,16 @@ module.exports = {
                             .orderBy({index: r.desc('submission_time')})
                             .pluck( ...fields )
     },
+    GetStatus: function* Get_Enroll_Status() {
+        const {r, mock} = this
+        const {id} = this.params
+        const fields = ['id', 'school', 'state']
+        this.status = 200
+        this.body   = mock
+                    ? MOCK_ENROLL_LIST
+                    : yield r.table('enroll')
+                            .pluck( ...fields )
+    },
     GetId: function* Get_Enroll_Id() {
         const {r, mock} = this
         const {id} = this.params

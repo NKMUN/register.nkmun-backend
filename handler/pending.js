@@ -21,7 +21,7 @@ module.exports = {
         if (!state || state === 'pending') {
             let {replaced} = mock
                            ? { replaced: 1 }
-                           : yield r.table('enroll').get(id).update({ state: 'inviting' })
+                           : yield r.table('enroll').get(id).update({ state: 'pending' })
 
             this.status = replaced ? 200 : 500
             this.body   = replaced ? { status: true } : { status: false, message: 'Fail to update state' }

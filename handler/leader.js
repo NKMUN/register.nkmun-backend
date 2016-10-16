@@ -3,6 +3,28 @@
 const {derive} = require('../lib/password-util')
 const { MOCK_ENROLL_ENTRY, MOCK_EXCHANGE_REQUEST_ENTRY } = require('../mock-data')
 
+function* removeUnavailableExchangeRequests(school, committee) {
+    const {r, mock} = this
+    if (mock)
+        return
+
+    yield r.table('enroll').get(school).getField('committee').getField(committee)
+            .do( (avail) =>
+                r.table('exchange').getAll(school, {index: 'to'})
+                .filter( $ => $('state').eq('pending') )
+                .filter( $ => r.and( $('wanted').eq(committee), $('amount').gt(avail) ) )
+                .delete()
+            )
+
+    yield r.table('enroll').get(school).getField('committee').getField(committee)
+            .do( (avail) =>
+                r.table('exchange').getAll(school, {index: 'from'})
+                .filter( $ => $('state').eq('pending') )
+                .filter( $ => r.and( $('offer').eq(committee), $('amount').gt(avail) ) )
+                .delete()
+            )
+}
+
 module.exports = {
     Get:  function* Handler_Get_Leader() {
         const {r, mock} = this
@@ -115,6 +137,39 @@ module.exports = {
         this.status = 200
         this.body   = { status: true }
     },
+    GiveupQuote: function* Handler_Post_Leader_GiveupQuote() {
+        const {mock, r} = this
+        const {school} = this.token
+        const {committee} = this.params
+        const amount = Math.floor( Number(this.request.body.amount) )
+
+        let {
+            replaced,
+            unchanged
+        } = mock
+          ? { replaced: 1 }
+          : yield r.table('enroll').get(school)
+                  .update( $ => r.branch(
+                      $('committee')(committee).gt(amount),
+                      { committee: { [committee]: $('committee')(committee).sub(amount) } },
+                      {}
+                  ) )
+        if (unchanged) {
+            this.status = 412
+            this.body = { status: false, message: 'Insufficient Quote' }
+            return
+        }
+        if (!replaced) {
+            this.status = 404
+            this.body = { status: false, message: 'Committee or school does not exist'}
+            return
+        }
+        yield removeUnavailableExchangeRequests.call(this, school, committee)
+        // return current quotes
+        this.body = mock
+                  ? MOCK_ENROLL_ENTRY.committee
+                  : yield r.table('enroll').get(this.token.school).getField('committee')
+    },
     GetExchangeRequest: function* Handler_Get_Leader_PendingExchangeRequest() {
         const {mock, r} = this
         const {id} = this.token
@@ -213,31 +268,10 @@ module.exports = {
          )
 
          // remove requests that can't be fulfilled
-         ;( mock
-          ? null
-          : yield r.table('enroll').get(from).getField('committee').getField(offer)
-                  .do( (avail) => 
-                      r.table('exchange').getAll(from, {index: 'from'})
-                      .filter( r.row('state').eq('pending') )
-                      .filter( r.and( r.row('offer').eq(offer), r.row('amount').gt(avail) ) )
-                      .delete()
-                  )
-         )
-
-
-         ;( mock
-         ? null
-         : yield r.table('enroll').get(to).getField('committee').getField(wanted)
-                 .do( (avail) => 
-                     r.table('exchange').getAll(to, {index: 'to'})
-                     .filter( r.row('state').eq('pending') )
-                     .filter( r.and( r.row('wanted').eq(offer), r.row('amount').gt(avail) ) )
-                     .delete()
-                 )
-         )
+         yield removeUnavailableExchangeRequests.call(this, from, offer)
+         yield removeUnavailableExchangeRequests.call(this, to, wanted)
 
          // return current committee quote
-                    
          this.status = 200
          this.body = mock
                    ? MOCK_ENROLL_ENTRY.committee
