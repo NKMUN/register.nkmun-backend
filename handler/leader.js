@@ -28,7 +28,7 @@ function* removeUnavailableExchangeRequests(school, committee) {
 module.exports = {
     Get:  function* Handler_Get_Leader() {
         const {r, mock} = this
-        const {id, school: schoolId} = this.token
+        const {id, school: schoolId = null} = this.token
 
         // Get leader's team state
         let school = mock
