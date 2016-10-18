@@ -74,6 +74,7 @@ function createApp({
     let HasLeaderAccess = Handler.Login.HasAccess('leader')
     leaders.get(   '/leader', HasLeaderAccess, Handler.Leader.Get )
     leaders.get(   '/leader/exchange-request',      HasLeaderAccess, Handler.Leader.GetExchangeRequest )
+    leaders.post(  '/leader/exchange-request',      HasLeaderAccess, Handler.Leader.PostExchangeRequest )
     leaders.post(  '/leader/exchange-request/:xid', HasLeaderAccess, Handler.Leader.FetchExchangeRequest, Handler.Leader.AcceptExchangeRequest )
     leaders.delete('/leader/exchange-request/:xid', HasLeaderAccess, Handler.Leader.FetchExchangeRequest, Handler.Leader.RefuseExchangeRequest )
     leaders.post(  '/leader/giveup/:committee',     HasLeaderAccess, Handler.Leader.GiveupQuote )

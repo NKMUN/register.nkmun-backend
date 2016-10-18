@@ -25,6 +25,15 @@ function* removeUnavailableExchangeRequests(school, committee) {
             )
 }
 
+function query_CheckExchangeAvailability( r, committee, amount ) {
+    return (r$) => r.and(
+        r$,
+        r$('state').coerceTo('string').match('inviting|invited|registered'),
+        r$('committee'),
+        r$('committee')(committee).ge(amount)
+    )
+}
+
 module.exports = {
     Get:  function* Handler_Get_Leader() {
         const {r, mock} = this
@@ -150,12 +159,12 @@ module.exports = {
           ? { replaced: 1 }
           : yield r.table('enroll').get(school)
                   .update( $ => r.branch(
-                      $('committee')(committee).gt(amount),
+                      $('committee')(committee).ge(amount),
                       { committee: { [committee]: $('committee')(committee).sub(amount) } },
                       {}
                   ) )
         if (unchanged) {
-            this.status = 412
+            this.status = 410
             this.body = { status: false, message: 'Insufficient Quote' }
             return
         }
@@ -172,10 +181,10 @@ module.exports = {
     },
     GetExchangeRequest: function* Handler_Get_Leader_PendingExchangeRequest() {
         const {mock, r} = this
-        const {id} = this.token
+        const {school: schoolId} = this.token
         let exchangeReqs = mock
                          ? [MOCK_EXCHANGE_REQUEST_ENTRY, MOCK_EXCHANGE_REQUEST_ENTRY]
-                         : yield r.table('exchange').getAll(id, {index: 'to'})
+                         : yield r.table('exchange').getAll(schoolId, {index: 'to'})
                                  .filter( r.row('state').eq('pending') )
                                  .eqJoin('from', r.table('enroll'))
                                  .map({
@@ -187,6 +196,59 @@ module.exports = {
                                  })
         this.status = 200
         this.body = exchangeReqs
+    },
+    PostExchangeRequest: function* Handler_Post_Leader_ExchangeRequest() {
+        const {mock, r} = this
+        const {school: schoolId} = this.token
+
+        let {
+            from,
+            to,
+            wanted,
+            offer,
+            amount
+        } = this.request.body
+
+        // verify access
+        if (schoolId !== from) {
+            this.status = 403
+            this.body = { status: false, message: 'Access denied' }
+            return
+        }
+
+        // check request is meaningful
+        if (from === to || wanted === offer || Number(amount) < 1) {
+            this.status = 400
+            this.body = { status: false, message: 'Invalid parameters' }
+            return
+        }
+
+        let available = mock
+                      ? true
+                      : r.and(
+                          r.table('enroll').get(from).do( query_CheckExchangeAvailability(r, offer, amount) ),
+                          r.table('enroll').get(to).do( query_CheckExchangeAvailability(r, wanted, amount) )
+                      )
+
+        if (!available) {
+            this.status = 410
+            this.bosy = { status: false, message: 'No available quote' }
+            return
+        }
+
+        let {
+            inserted
+        } = mock
+          ? { inserted: 1 }
+          : yield r.table('exchange').insert({ from, to, offer, wanted, amount, state: 'pending' })
+
+        if (inserted) {
+            this.status = 200
+            this.body = { status: true, message: 'Exchange request submitted' }
+        } else {
+            this.status = 500
+            this.body = { status: false, message: 'Exchange request creation failed'}
+        }
     },
     FetchExchangeRequest: function* Handler_FetchExchangeRequest(next) {
         const {mock, r} = this
@@ -231,11 +293,12 @@ module.exports = {
 
         let available = mock
                       ? true
-                      : r.table('enroll').get(from, to).getField('committee')
-                        .do( (from, to) => r.and( from(offer).ge(amount), to(wanted).ge(amount) ) )
+                      : r.table('enroll').getAll(from, to).getField('committee')
+                        .do( (from, to) =>
+                            r.and( from, to, from(offer).ge(amount), to(wanted).ge(amount) ) )
 
         if (!available) {
-            this.status = 412
+            this.status = 410
             this.body = { status: false, message: 'Insufficient quote' }
             return
         }
