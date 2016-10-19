@@ -288,14 +288,22 @@ module.exports = {
             to,
             wanted,
             offer,
-            amount
+            amount,
+            state
         } = this.exchangeRequest
+
+        if (state !== 'pending') {
+            this.status = 409
+            this.body = { status: false, message: 'Request already processed' }
+            return
+        }
 
         let available = mock
                       ? true
-                      : r.table('enroll').getAll(from, to).getField('committee')
-                        .do( (from, to) =>
-                            r.and( from, to, from(offer).ge(amount), to(wanted).ge(amount) ) )
+                      : yield r.table('enroll').getAll(from, to).getField('committee')
+                              .do( (from, to) =>
+                                  r.and( from, to, from(offer).ge(amount), to(wanted).ge(amount) )
+                              )
 
         if (!available) {
             this.status = 410
@@ -339,5 +347,18 @@ module.exports = {
          this.body = mock
                    ? MOCK_ENROLL_ENTRY.committee
                    : yield r.table('enroll').get(this.token.school).getField('committee')
+    },
+    ConfirmQuote: function* Handler_Leader_ConfirmQuote() {
+        const {mock, r} = this
+        const {school: schoolId} = this.token
+
+        if (!mock) {
+            yield r.table('exchange').getAll(schoolId, {index: 'from'}).update({ state: 'refused' })
+            yield r.table('exchange').getAll(schoolId, {index: 'to'}).update({ state: 'refused' })
+            yield r.table('enroll').get(schoolId).update({ state: 'quote-confirmed' })
+        }
+
+        this.status = 200
+        this.body = { status: true, message: 'Quote confirmed' }
     }
 }
