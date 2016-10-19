@@ -77,8 +77,8 @@ function createApp({
     leaders.post(  '/leader/exchange-request',      HasLeaderAccess, Handler.Leader.PostExchangeRequest )
     leaders.post(  '/leader/exchange-request/:xid', HasLeaderAccess, Handler.Leader.FetchExchangeRequest, Handler.Leader.AcceptExchangeRequest )
     leaders.delete('/leader/exchange-request/:xid', HasLeaderAccess, Handler.Leader.FetchExchangeRequest, Handler.Leader.RefuseExchangeRequest )
-    leaders.post(  '/leader/giveup/:committee',     HasLeaderAccess, Handler.Leader.GiveupQuote )
-    leaders.post(  '/leader/confirm-quote',         HasLeaderAccess, Handler.Leader.ConfirmQuote )
+    leaders.post(  '/leader/giveup/:committee',     HasLeaderAccess, Handler.Leader.GiveupQuota )
+    leaders.post(  '/leader/confirm-quota',         HasLeaderAccess, Handler.Leader.ConfirmQuota )
     // Admin Router
     let admins = new Router()
     let HasAdminAccess = Handler.Login.HasAccess('admin')

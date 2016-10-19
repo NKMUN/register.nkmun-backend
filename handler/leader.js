@@ -146,7 +146,7 @@ module.exports = {
         this.status = 200
         this.body   = { status: true }
     },
-    GiveupQuote: function* Handler_Post_Leader_GiveupQuote() {
+    GiveupQuota: function* Handler_Post_Leader_GiveupQuota() {
         const {mock, r} = this
         const {school} = this.token
         const {committee} = this.params
@@ -165,7 +165,7 @@ module.exports = {
                   ) )
         if (unchanged) {
             this.status = 410
-            this.body = { status: false, message: 'Insufficient Quote' }
+            this.body = { status: false, message: 'Insufficient Quota' }
             return
         }
         if (!replaced) {
@@ -174,7 +174,7 @@ module.exports = {
             return
         }
         yield removeUnavailableExchangeRequests.call(this, school, committee)
-        // return current quotes
+        // return current quotas
         this.body = mock
                   ? MOCK_ENROLL_ENTRY.committee
                   : yield r.table('enroll').get(this.token.school).getField('committee')
@@ -232,7 +232,7 @@ module.exports = {
 
         if (!available) {
             this.status = 410
-            this.bosy = { status: false, message: 'No available quote' }
+            this.bosy = { status: false, message: 'No available quota' }
             return
         }
 
@@ -307,7 +307,7 @@ module.exports = {
 
         if (!available) {
             this.status = 410
-            this.body = { status: false, message: 'Insufficient quote' }
+            this.body = { status: false, message: 'Insufficient quota' }
             return
         }
 
@@ -342,23 +342,23 @@ module.exports = {
          yield removeUnavailableExchangeRequests.call(this, from, offer)
          yield removeUnavailableExchangeRequests.call(this, to, wanted)
 
-         // return current committee quote
+         // return current committee quota
          this.status = 200
          this.body = mock
                    ? MOCK_ENROLL_ENTRY.committee
                    : yield r.table('enroll').get(this.token.school).getField('committee')
     },
-    ConfirmQuote: function* Handler_Leader_ConfirmQuote() {
+    ConfirmQuota: function* Handler_Leader_ConfirmQuota() {
         const {mock, r} = this
         const {school: schoolId} = this.token
 
         if (!mock) {
             yield r.table('exchange').getAll(schoolId, {index: 'from'}).update({ state: 'refused' })
             yield r.table('exchange').getAll(schoolId, {index: 'to'}).update({ state: 'refused' })
-            yield r.table('enroll').get(schoolId).update({ state: 'quote-confirmed' })
+            yield r.table('enroll').get(schoolId).update({ state: 'quota-confirmed' })
         }
 
         this.status = 200
-        this.body = { status: true, message: 'Quote confirmed' }
+        this.body = { status: true, message: 'Quota confirmed' }
     }
 }
