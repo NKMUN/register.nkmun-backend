@@ -14,8 +14,6 @@ const Mailer = require('nodemailer')
 
 const Handler = require('./handler')
 
-const NOTICE_MAIL_FROM = '2017@nkmun.cn'
-
 function createDBConnection(dbHost, dbPort) {
     return require('rethinkdbdash')({
         host:   dbHost,
