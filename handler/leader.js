@@ -300,10 +300,10 @@ module.exports = {
 
         let available = mock
                       ? true
-                      : yield r.table('enroll').getAll(from, to).getField('committee')
-                              .do( (from, to) =>
-                                  r.and( from, to, from(offer).ge(amount), to(wanted).ge(amount) )
-                              )
+                      : yield r.and(
+                          r.table('enroll').get(from).do( query_CheckExchangeAvailability(r, offer, amount) ),
+                          r.table('enroll').get(to).do( query_CheckExchangeAvailability(r, wanted, amount) )
+                      )
 
         if (!available) {
             this.status = 410
