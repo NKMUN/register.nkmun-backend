@@ -273,7 +273,7 @@ module.exports = {
         
         ;( mock
          ? null
-         : yield r.table('enroll').get(this.exchangeRequest.id).delete()
+         : yield r.table('exchange').get(this.exchangeRequest.id).delete()
         )
 
         this.status = 200
