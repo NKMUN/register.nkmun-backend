@@ -7,5 +7,6 @@ module.exports = {
     Disclaimer: require('./disclaimer'),
     Invitation: require('./invitation'),
     Pending: require('./pending'),
-    Leader: require('./leader')
+    Leader: require('./leader'),
+    Accommodation: require('./accommodation')
 }

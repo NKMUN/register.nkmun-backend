@@ -84,5 +84,9 @@ module.exports = {
         offer:  'loc_cn_1',
         wanted: 'loc_en_1',
         amount: 1
-    }
+    },
+    MOCK_ACCOMMODATION: [
+        { id: '1', name: 'Hotel 1', type: 'Standard', quota: 10, reservation: [] },
+        { id: '2', name: 'Hotel 1', type: 'Suite', quota: 20, reservation: [] }
+    ]
 }

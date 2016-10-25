@@ -13,6 +13,16 @@ const WARN = yellow('Warn')
 
 const log = (str) => process.stdout.write(str+'\n')
 
+const _A = (id, name, type, quota, price) => ({id, name, type, quota, stock: quota, price})
+const ACCOMMODATION = [
+    _A('ilc-std', '国际博览中心酒店', '标准间', 170, 0),
+    _A('ilc-knd', '国际博览中心酒店', '大床房',  50, 0),
+    _A('xinhua-std', '新华传媒粤海酒店', '标准间', 100, 0),
+    _A('xinhua-kng', '新华传媒粤海酒店', '大床房',  30, 0),
+    _A('xincheng-std', '新城商务酒店', '标准间', 100, 0),
+    _A('xincheng-kng', '新城商务酒店', '大床房',  30, 0),
+]
+
 program
     .version('0.1.0')
     .option('--mock', 'Run in mock mode')
@@ -70,6 +80,8 @@ if (mock) {
         yield OP('leader',   r.tableCreate('leader'),   conn, 'tables_created')
         yield OP('exchange', r.tableCreate('exchange'), conn, 'tables_created')
         yield OP('payment',  r.tableCreate('payment'),  conn, 'tables_created')
+        yield OP('accommodation', r.tableCreate('accommodation'), conn, 'tables_created')
+        yield OP('reservation', r.tableCreate('reservation'), conn, 'tables_created')
 
         log('Creating secondary indexes')
         yield OP('enroll/submission_time', r.table('enroll').indexCreate('submission_time'), conn, 'created')
@@ -77,6 +89,12 @@ if (mock) {
         yield OP('enroll/leader',          r.table('enroll').indexCreate('leader'),          conn, 'created')
         yield OP('exchange/to',            r.table('exchange').indexCreate('to'),            conn, 'created')
         yield OP('exchange/from',          r.table('exchange').indexCreate('from'),          conn, 'created')
+        yield OP('reservation/school',     r.table('reservation').indexCreate('school'),     conn, 'created')
+        yield OP('reservation/accommodation', r.table('reservation').indexCreate('accommodation'), conn, 'created')
+
+        log('Initialize Accommodation Entries')
+        for (let entry of ACCOMMODATION)
+            yield OP(`accommodation: ${entry.name} ${entry.type}`, r.table('accommodation').insert(entry), conn, 'inserted', 'errors')
     })
     .then( ()=>{
         log(`${OK} All done`)
