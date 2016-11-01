@@ -192,7 +192,8 @@ module.exports = {
                                      from:   r.row('right')('school'),  // school name
                                      offer:  r.row('left')('offer'),
                                      wanted: r.row('left')('wanted'),
-                                     amount: r.row('left')('amount')
+                                     amount: r.row('left')('amount'),
+                                     note:   r.row('left')('note').default(null)
                                  })
         this.status = 200
         this.body = exchangeReqs
@@ -206,7 +207,8 @@ module.exports = {
             to,
             wanted,
             offer,
-            amount
+            amount,
+            note = null
         } = this.request.body
 
         // verify access
@@ -240,7 +242,7 @@ module.exports = {
             inserted
         } = mock
           ? { inserted: 1 }
-          : yield r.table('exchange').insert({ from, to, offer, wanted, amount, state: 'pending' })
+          : yield r.table('exchange').insert({ from, to, offer, wanted, amount, state: 'pending', note })
 
         if (inserted) {
             this.status = 200
