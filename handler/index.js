@@ -8,5 +8,6 @@ module.exports = {
     Invitation: require('./invitation'),
     Pending: require('./pending'),
     Leader: require('./leader'),
-    Accommodation: require('./accommodation')
+    Accommodation: require('./accommodation'),
+    Payment: require('./payment')
 }
