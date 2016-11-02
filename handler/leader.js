@@ -13,7 +13,7 @@ function* removeUnavailableExchangeRequests(school, committee) {
                 r.table('exchange').getAll(school, {index: 'to'})
                 .filter( $ => $('state').eq('pending') )
                 .filter( $ => r.and( $('wanted').eq(committee), $('amount').gt(avail) ) )
-                .delete()
+                .update({ state: 'unavailable' })
             )
 
     yield r.table('enroll').get(school).getField('committee').getField(committee)
@@ -21,7 +21,7 @@ function* removeUnavailableExchangeRequests(school, committee) {
                 r.table('exchange').getAll(school, {index: 'from'})
                 .filter( $ => $('state').eq('pending') )
                 .filter( $ => r.and( $('offer').eq(committee), $('amount').gt(avail) ) )
-                .delete()
+                .update({ state: 'unavailable' })
             )
 }
 
@@ -150,7 +150,7 @@ module.exports = {
         const {mock, r} = this
         const {school} = this.token
         const {committee} = this.params
-        const amount = Math.floor( Number(this.request.body.amount) )
+        const amount = Math.floor( Number( (this.is('multipart') ? this.request.body.fields : this.request.body).amount) )
 
         let {
             replaced,
@@ -209,7 +209,7 @@ module.exports = {
             offer,
             amount,
             note = null
-        } = this.request.body
+        } = this.is('multipart') ? this.request.body.fields : this.request.body
 
         // verify access
         if (schoolId !== from) {
@@ -353,11 +353,15 @@ module.exports = {
     ConfirmQuota: function* Handler_Leader_ConfirmQuota() {
         const {mock, r} = this
         const {school: schoolId} = this.token
+        const {optLeaderAttend} = this.is('multipart') ? this.request.body.fields : this.request.body
 
         if (!mock) {
             yield r.table('exchange').getAll(schoolId, {index: 'from'}).update({ state: 'refused' })
             yield r.table('exchange').getAll(schoolId, {index: 'to'}).update({ state: 'refused' })
-            yield r.table('enroll').get(schoolId).update({ state: 'quota-confirmed' })
+            yield r.table('enroll').get(schoolId).update({
+                state: 'quota-confirmed',
+                committee: { 'loc_absent_leader': optLeaderAttend ? 0 : 1 }
+            })
         }
 
         this.status = 200
