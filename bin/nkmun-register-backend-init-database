@@ -82,6 +82,7 @@ if (mock) {
         yield OP('payment',  r.tableCreate('payment'),  conn, 'tables_created')
         yield OP('accommodation', r.tableCreate('accommodation'), conn, 'tables_created')
         yield OP('reservation', r.tableCreate('reservation'), conn, 'tables_created')
+        yield OP('payment',     r.tableCreate('payment'), conn, 'tables_creared')
 
         log('Creating secondary indexes')
         yield OP('enroll/submission_time', r.table('enroll').indexCreate('submission_time'), conn, 'created')

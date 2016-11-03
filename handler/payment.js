@@ -6,6 +6,8 @@ const COMMITTEE_PRICE = {
     "*": 750
 }
 
+const {readFile, unlink} = require('mz/fs')
+
 function differenceOfDays(a, b) {
     return Math.round( (new Date(a) - new Date(b)) / (24*3600*1000) )
 }
@@ -107,9 +109,47 @@ function* respondWithSchoolBilling(schoolId, detail = false) {
 module.exports = {
     Post: function* Handler_Post_PaymentCredential() {
         const {mock, r} = this
-        const data = this.is('multipart') ? this.request.body.fields : this.request.body
+        const {school: schoolId} = this.token
 
-        console.log(this.request.body)
+        if ( ! this.is('multipart') ) {
+            this.status = 415
+            this.body = { status: false, message: 'Expect multipart/form-data' }
+            return
+        }
+
+        let {mime} = this.request.body.fields
+        let {path, size} = this.request.body.files['cred'] || {}
+
+        if (!path || !size) {
+            this.status = 400
+            this.body = { status: false, message: 'Credential required' }
+            return
+        }
+
+        if (mock) {
+            this.status = 200
+            this.body = { status: true, message: 'Credential uploaded' }
+            return
+        }
+
+        let {inserted, replaced, unchanged} = yield r.table('payment').insert({
+            id: schoolId,
+            mime,
+            buffer: yield readFile(path)
+        }, {
+            conflict: 'update'
+        })
+
+        if (!inserted && !replaced && !unchanged) {
+            this.status = 500
+            this.body = { status: false, message: 'Internal Error during db insertion' }
+            return
+        }
+
+        yield r.table('enroll').get(schoolId).update({ state: 'paid' })
+
+        this.status = 200
+        this.body = { status: true, message: 'Credential uploaded' }
     },
     Get: function* Handler_Get_Billing() {
         let { school: schoolId } = this.token
@@ -118,5 +158,23 @@ module.exports = {
     GetId: function* Handler_Get_BillingId() {
         let schoolId = this.params.id
         yield respondWithSchoolBilling.call(this, schoolId)
+    },
+    GetPaymentCredential: function* Handler_Get_PaymentCredential() {
+        const {mock, r} = this
+        let schoolId = this.params.id
+        if (mock) {
+            this.status = 204
+            return
+        }
+        
+        let {mime, buffer} = yield r.table('payment').get(schoolId)
+        if (!buffer) {
+            this.status = 404
+            return
+        }
+
+        this.status = 200
+        this.set('Content-Type', mime)
+        this.body = buffer
     }
 }
