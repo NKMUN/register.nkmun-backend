@@ -15,12 +15,12 @@ const log = (str) => process.stdout.write(str+'\n')
 
 const _A = (id, name, type, quota, price) => ({id, name, type, quota, stock: quota, price})
 const ACCOMMODATION = [
-    _A('ilc-std',    '国际博览中心酒店', '标准间', 120, 500),
-    _A('ilc-knd',    '国际博览中心酒店', '大床房',  50, 500),
-    _A('xinhua-std', '新华传媒粤海国际大酒店', '标准间', 96, 550),
-    _A('xinhua-kng', '新华传媒粤海国际大酒店', '大床房', 30, 550),
-    _A('jinlin-std', '南京金陵滨江酒店', '标准间', 82, 400),
-    _A('jinlin-kng', '南京金陵滨江酒店', '大床房', 35, 400)
+    _A('ilc-std',    '国际博览中心酒店', '标准间', 120, 400),
+    _A('ilc-knd',    '国际博览中心酒店', '大床房',  50, 400),
+    _A('xinhua-std', '新华传媒粤海国际大酒店', '标准间', 101, 550),
+    _A('xinhua-kng', '新华传媒粤海国际大酒店', '大床房',  75, 550),
+    _A('jinlin-std', '南京金陵江滨酒店', '标准间', 82, 500),
+    _A('jinlin-kng', '南京金陵江滨酒店', '大床房', 35, 500)
 ]
 
 program
