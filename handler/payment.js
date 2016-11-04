@@ -3,6 +3,7 @@
 const COMMITTEE_PRICE = {
     "loc_absent_leader": 350,
     "loc_observer": 350,
+    "loc_superv": 0,
     "*": 750
 }
 
@@ -15,7 +16,7 @@ function differenceOfDays(a, b) {
 function getCommitteeBill(committee, PRICE) {
     let sum = 0
     for (let c in committee)
-        sum += (PRICE[c] || PRICE['*']) * committee[c]
+        sum += (PRICE[c]!==undefined ? PRICE[c] : PRICE['*']) * committee[c]
     return sum
 }
 
@@ -153,7 +154,7 @@ module.exports = {
     },
     Get: function* Handler_Get_Billing() {
         let { school: schoolId } = this.token
-        yield respondWithSchoolBilling.call(this, schoolId, true)
+        yield respondWithSchoolBilling.call(this, schoolId)
     },
     GetId: function* Handler_Get_BillingId() {
         let schoolId = this.params.id
