@@ -69,6 +69,7 @@ function getAccommodationBillingEntries(reservations, PRICE, NAME) {
 
 function* respondWithSchoolBilling(schoolId, detail = false) {
     const {mock, r} = this
+    const {access} = this.token
 
     if (mock) {
         this.status = 200
@@ -85,7 +86,7 @@ function* respondWithSchoolBilling(schoolId, detail = false) {
         return
     }
 
-    if (state !== 'accommodation-confirmed') {
+    if (state !== 'accommodation-confirmed' && access !== 'admin') {
         this.status = 412
         this.body = { status: false, message: 'School not eligible for billing' }
         return
@@ -160,6 +161,18 @@ module.exports = {
         let schoolId = this.params.id
         yield respondWithSchoolBilling.call(this, schoolId)
     },
+    GetList: function* Handler_Get_Paid_List() {
+        const {mock, r} = this
+        if (mock) {
+            this.status = 200
+            this.body = []
+            return
+        }
+        this.status = 200
+        this.body = yield r.table('payment').filter(
+            r.not( r.row('state').default('').eq('accepted') )
+        ).pluck('id', 'state')
+    },
     GetPaymentCredential: function* Handler_Get_PaymentCredential() {
         const {mock, r} = this
         let schoolId = this.params.id
@@ -177,5 +190,34 @@ module.exports = {
         this.status = 200
         this.set('Content-Type', mime)
         this.body = buffer
+    },
+    PostReview: function* Handler_Post_PaymentReview() {
+        const {mock, r} = this
+        const {id} = this.params
+        let {accept, reject, amount} = this.is('multipart') ? this.request.body.fields : this.request.body
+
+        if ( (accept && reject) || (!accept && !reject) ) {
+            this.status = 400
+            this.body = { status: false, message: 'Can not accept and reject at the same time' }
+            return
+        }
+
+        if (accept) {
+            if (!mock) {
+                yield r.table('payment').get(id).update({ state: 'accepted', timestamp: r.now().toEpochTime() })
+                yield r.table('enroll').get(id).update({ state: 'payment-confirmed', paidAmount: accept })
+            }
+            this.status = 200
+            this.body = { status: true, message: 'Payment verified' }
+        }
+
+        if (reject) {
+            if (!mock) {
+                yield r.table('payment').get(id).update({ state: 'rejected', timestamp: r.now().toEpochTime(), reason: reject })
+                yield r.table('enroll').get(id).update({ state: 'accommodation-confirmed' })
+            }
+            this.status = 200
+            this.body = { status: true, message: 'Payment rejected' }
+        }
     }
 }

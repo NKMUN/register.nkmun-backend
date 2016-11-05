@@ -93,7 +93,9 @@ function createApp({
     admins.post('/invitation',    HasAdminAccess, Handler.Invitation.Post )
     admins.post('/pending',       HasAdminAccess, Handler.Pending.Post )
     admins.get( '/billing/:id',   HasAdminAccess, Handler.Payment.GetId )
-    admins.get( '/payment/:id',   Handler.Payment.GetPaymentCredential )
+    admins.get( '/payment/:id',   HasAdminAccess, Handler.Payment.GetPaymentCredential )
+    admins.get( '/payment',       HasAdminAccess, Handler.Payment.GetList )
+    admins.post('/payment/:id',   HasAdminAccess, Handler.Payment.PostReview )
 
     app.use( publics.routes() )
     app.use( Handler.Login.Router )
