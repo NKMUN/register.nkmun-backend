@@ -25,7 +25,7 @@ function getAccommodationBill(reservations, PRICE) {
            (PRICE[accommodation]!==undefined ? PRICE[accommodation] : PRICE['*'])
          * amount
          * differenceOfDays(checkOut, checkIn)
-    ).reduce( (l,r) => l+r )
+    ).reduce( (l,r) => l+r, 0 )
 }
 
 function* getAccommodationPrice(r) {
