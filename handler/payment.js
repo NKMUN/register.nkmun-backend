@@ -9,6 +9,20 @@ const COMMITTEE_PRICE = {
 
 const {readFile, unlink} = require('mz/fs')
 
+const createSuccessEmail = require('../lib/create-payment-success-email')
+const createFailureEmail = require('../lib/create-payment-failure-email')
+
+function MailerSendMail(mailer, opts) {
+    return new Promise( (resolve, reject) => {
+        mailer.sendMail(opts, (err, info)=>{
+            if (err)
+                reject(err)
+            else
+                resolve(info)
+        })
+    })
+}
+
 function differenceOfDays(a, b) {
     return Math.round( (new Date(a) - new Date(b)) / (24*3600*1000) )
 }
@@ -192,7 +206,7 @@ module.exports = {
         this.body = buffer
     },
     PostReview: function* Handler_Post_PaymentReview() {
-        const {mock, r} = this
+        const {mock, r, mailer, NOTICE_MAIL_FROM} = this
         const {id} = this.params
         let {accept, reject, amount} = this.is('multipart') ? this.request.body.fields : this.request.body
 
@@ -206,6 +220,23 @@ module.exports = {
             if (!mock) {
                 yield r.table('payment').get(id).update({ state: 'accepted', timestamp: r.now().toEpochTime() })
                 yield r.table('enroll').get(id).update({ state: 'payment-confirmed', paidAmount: accept })
+                try {
+                    let mailOpts = {
+                        from: NOTICE_MAIL_FROM,
+                        to: yield r.table('enroll').get(id).getField('leader'),
+                        subject: '2017汇文国际中学生模拟联合国大会缴费成功通知',
+                        html: createSuccessEmail({
+                            school: id,
+                            money: accept
+                        })
+                    }
+                    yield MailerSendMail(mailer, mailOpts)
+                } catch(e) {
+                    console.log(e)
+                    this.status = 500
+                    this.body   = { status: false, message: 'Mail delivery failed', error: e.message }
+                    return
+                }
             }
             this.status = 200
             this.body = { status: true, message: 'Payment verified' }
@@ -214,7 +245,23 @@ module.exports = {
         if (reject) {
             if (!mock) {
                 yield r.table('payment').get(id).update({ state: 'rejected', timestamp: r.now().toEpochTime(), reason: reject })
-                yield r.table('enroll').get(id).update({ state: 'accommodation-confirmed' })
+                yield r.table('enroll').get(id).update({ state: 'payment-rejected' })
+                try {
+                    let mailOpts = {
+                        from: NOTICE_MAIL_FROM,
+                        to: yield r.table('enroll').get(id).getField('leader'),
+                        subject: '[重要] 2017汇文国际中学生模拟联合国大会缴费失败通知',
+                        html: createFailureEmail({
+                            school: id,
+                            reason: reject
+                        })
+                    }
+                    yield MailerSendMail(mailer, mailOpts)
+                } catch(e) {
+                    this.status = 500
+                    this.body   = { status: false, message: 'Mail delivery failed', error: e.message }
+                    return
+                }
             }
             this.status = 200
             this.body = { status: true, message: 'Payment rejected' }
