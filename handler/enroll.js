@@ -77,5 +77,14 @@ module.exports = {
                   : yield r.table('enroll').get(id)
         this.status = entry ? 200 : 404
         this.body   = entry
+    },
+    GetCommittee: function* Get_Enroll_Committee() {
+        const {r, mock} = this
+        const {id} = this.params
+        let entry = mock
+                  ? {}
+                  : yield r.table('enroll').get(id).getField('committee')
+        this.status = entry ? 200: 404
+        this.body = entry ? entry : []
     }
 }

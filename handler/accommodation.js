@@ -10,6 +10,17 @@ module.exports = {
                   ? MOCK_ACCOMMODATION
                   : yield r.table('accommodation').orderBy({index: 'id'}).pluck('id', 'name', 'type', 'stock')
     },
+    GetReservation: function* Handler_Get_Reservation() {
+        const {mock, r} = this
+        let schoolId = this.params.id
+        this.status = 200
+        this.body = mock
+                  ? []
+                  : yield r.table('reservation').getAll(schoolId, {index: 'school'})
+                          .eqJoin('accommodation', r.db('nkmun').table('accommodation'))
+                          .without({ left: ['accommodation'], right: ['id', 'quota', 'stock', 'price'] })
+                          .zip()
+    },
     Post: function* Handler_Post_AccommodationReservation() {
         const {mock, r} = this
         const {school: schoolId} = this.token

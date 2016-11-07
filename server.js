@@ -96,6 +96,8 @@ function createApp({
     admins.get( '/payment/:id',   HasAdminAccess, Handler.Payment.GetPaymentCredential )
     admins.get( '/payment',       HasAdminAccess, Handler.Payment.GetList )
     admins.post('/payment/:id',   HasAdminAccess, Handler.Payment.PostReview )
+    admins.get( '/enroll/committee/:id', HasAdminAccess, Handler.Enroll.GetCommittee )
+    admins.get( '/accommodation/:id', HasAdminAccess, Handler.Accommodation.GetReservation )
 
     app.use( publics.routes() )
     app.use( Handler.Login.Router )
