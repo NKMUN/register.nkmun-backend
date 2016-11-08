@@ -183,9 +183,7 @@ module.exports = {
             return
         }
         this.status = 200
-        this.body = yield r.table('payment').filter(
-            r.not( r.row('state').default('').eq('accepted') )
-        ).pluck('id', 'state')
+        this.body = yield r.table('payment').pluck('id', 'state')
     },
     GetPaymentCredential: function* Handler_Get_PaymentCredential() {
         const {mock, r} = this
