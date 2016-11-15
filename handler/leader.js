@@ -53,6 +53,13 @@ module.exports = {
 
         school.exchanges = exchangeReqs
 
+        let paymentStatus = mock
+                          ? { state: 'accepted', reason: null }
+                          : yield r.table('payment').get(schoolId).default({})
+                            .pluck('state', 'reason')
+
+        school.paymentStatus = paymentStatus
+
         if (school.id) {
             this.status = 200
             this.body   = school
