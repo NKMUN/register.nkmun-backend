@@ -100,7 +100,10 @@ function* respondWithSchoolBilling(schoolId, detail = false) {
         return
     }
 
-    if (state !== 'accommodation-confirmed' && access !== 'admin') {
+    if (  state !== 'accommodation-confirmed'
+       && state !== 'payment-rejected'
+       && access === 'admin'
+    ) {
         this.status = 412
         this.body = { status: false, message: 'School not eligible for billing' }
         return
@@ -151,7 +154,8 @@ module.exports = {
         let {inserted, replaced, unchanged} = yield r.table('payment').insert({
             id: schoolId,
             mime,
-            buffer: yield readFile(path)
+            buffer: yield readFile(path),
+            state: null
         }, {
             conflict: 'update'
         })
