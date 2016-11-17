@@ -102,7 +102,7 @@ function* respondWithSchoolBilling(schoolId, detail = false) {
 
     if (  state !== 'accommodation-confirmed'
        && state !== 'payment-rejected'
-       && access === 'admin'
+       && access !== 'admin'
     ) {
         this.status = 412
         this.body = { status: false, message: 'School not eligible for billing' }
@@ -197,7 +197,7 @@ module.exports = {
             return
         }
         
-        let {mime, buffer} = yield r.table('payment').get(schoolId)
+        let {mime, buffer, timestamp} = yield r.table('payment').get(schoolId)
         if (!buffer) {
             this.status = 404
             return
@@ -205,6 +205,7 @@ module.exports = {
 
         this.status = 200
         this.set('Content-Type', mime)
+        this.set('X-Timestamp', timestamp)
         this.body = buffer
     },
     PostReview: function* Handler_Post_PaymentReview() {
