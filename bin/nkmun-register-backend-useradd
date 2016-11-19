@@ -13,7 +13,7 @@ program
     .option('--mock', 'Run in mock mode')
     .option('--db-host [host], Database host, default 127.0.0.1')
     .option('--db-port [port], Database port, default 28015', parseInt)
-    .option('-a, --access', 'Access level, default: "admin"')
+    .option('-a, --access [access]', 'Access level, default: "admin"')
     .parse(process.argv)
 
 const {
