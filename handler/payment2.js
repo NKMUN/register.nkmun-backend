@@ -23,8 +23,8 @@ function* respondWithSchoolBilling(schoolId) {
         return
     }
 
-    let {state, committee} = yield r.table('enroll').get(schoolId).default({}).pluck('state', 'committee')
-    let reservations = yield r.table('reservation').getAll(schoolId, {index: 'school'})
+    let {state, committee2: committee} = yield r.table('enroll').get(schoolId).default({}).pluck('state', 'committee2')
+    let reservations = yield r.table('reservation2').getAll(schoolId, {index: 'school'})
 
     if (!committee) {
         this.status = 404
@@ -32,8 +32,8 @@ function* respondWithSchoolBilling(schoolId) {
         return
     }
 
-    if (  state !== 'accommodation-confirmed'
-       && state !== 'payment-rejected'
+    if (  state !== 'accommodation-confirmed-2'
+       && state !== 'payment-rejected-2'
        && access !== 'admin'
     ) {
         this.status = 412
@@ -43,7 +43,7 @@ function* respondWithSchoolBilling(schoolId) {
 
     this.status = 200
     this.body = getBillingJSON({
-        committee,
+        committee: committee,
         reservations,
         committeePrice: COMMITTEE_PRICE,
         accommodationPrice: yield getAccommodationPrice(r, 'accommodation'),
@@ -76,7 +76,7 @@ module.exports = {
             return
         }
 
-        let {inserted, replaced, unchanged} = yield r.table('payment').insert({
+        let {inserted, replaced, unchanged} = yield r.table('payment2').insert({
             id: schoolId,
             mime,
             buffer: yield readFile(path),
@@ -91,7 +91,7 @@ module.exports = {
             return
         }
 
-        yield r.table('enroll').get(schoolId).update({ state: 'paid' })
+        yield r.table('enroll').get(schoolId).update({ state: 'paid-2' })
 
         this.status = 200
         this.body = { status: true, message: 'Credential uploaded' }
@@ -112,7 +112,7 @@ module.exports = {
             return
         }
         this.status = 200
-        this.body = yield r.table('payment').pluck('id', 'state')
+        this.body = yield r.table('payment2').pluck('id', 'state')
     },
     GetPaymentCredential: function* Handler_Get_PaymentCredential() {
         const {mock, r} = this
@@ -122,7 +122,7 @@ module.exports = {
             return
         }
 
-        let {mime, buffer, timestamp} = yield r.table('payment').get(schoolId).default({})
+        let {mime, buffer, timestamp} = yield r.table('payment2').get(schoolId).default({})
         if (!buffer) {
             this.status = 404
             return
@@ -146,8 +146,8 @@ module.exports = {
 
         if (accept) {
             if (!mock) {
-                yield r.table('payment').get(id).update({ state: 'accepted', timestamp: r.now().toEpochTime() })
-                yield r.table('enroll').get(id).update({ state: 'payment-confirmed', paidAmount: r.row('paidAmount').default(0).add(accept) })
+                yield r.table('payment2').get(id).update({ state: 'accepted', timestamp: r.now().toEpochTime() })
+                yield r.table('enroll').get(id).update({ state: 'payment-confirmed-2', paidAmount: r.row('paidAmount').default(0).add(accept) })
                 try {
                     let mailOpts = {
                         from: NOTICE_MAIL_FROM,
@@ -172,8 +172,8 @@ module.exports = {
 
         if (reject) {
             if (!mock) {
-                yield r.table('payment').get(id).update({ state: 'rejected', timestamp: r.now().toEpochTime(), reason: reject })
-                yield r.table('enroll').get(id).update({ state: 'payment-rejected' })
+                yield r.table('payment2').get(id).update({ state: 'rejected', timestamp: r.now().toEpochTime(), reason: reject })
+                yield r.table('enroll').get(id).update({ state: 'payment-rejected-2' })
                 try {
                     let mailOpts = {
                         from: NOTICE_MAIL_FROM,

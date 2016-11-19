@@ -43,30 +43,30 @@ module.exports = {
         let school = mock
                    ? MOCK_ENROLL_ENTRY
                    : yield r.table('enroll').get(schoolId).default({})
-                           .pluck('id', 'school', 'state', 'committee')
+                           .pluck('id', 'school', 'state', 'committee', 'committee2')
 
-        let exchangeReqs = mock
+        if (!school.id) {
+            this.status = 404
+            this.body = { message: 'Leader is not associated with any school' }
+            return
+        }
+
+        school.exchanges = mock
                          ? 1
                          : yield r.table('exchange').getAll(id, {index: 'to'})
                                  .filter( r.row('state').eq('pending') )
                                  .count()
+        school.paymentStatus = mock
+                             ? { state: 'accepted', reason: null }
+                             : yield r.table('payment').get(schoolId).default({})
+                               .pluck('state', 'reason')
+        school.paymentStatus2 = mock
+                              ? { state: 'accepted', reason: null }
+                              : yield r.table('payment2').get(schoolId).default({})
+                                .pluck('state', 'reason')
 
-        school.exchanges = exchangeReqs
-
-        let paymentStatus = mock
-                          ? { state: 'accepted', reason: null }
-                          : yield r.table('payment').get(schoolId).default({})
-                            .pluck('state', 'reason')
-
-        school.paymentStatus = paymentStatus
-
-        if (school.id) {
-            this.status = 200
-            this.body   = school
-        } else {
-            this.status = 404
-            this.body   = {message: 'Leader is not associated with any school'}
-        }
+        this.status = 200
+        this.body   = school
     },
     Post: function* Handler_Post_Leader() {
         const {mock, r} = this
@@ -104,7 +104,7 @@ module.exports = {
         } = mock
           ? { inserted: 1 }
           : yield r.table('leader').insert(data)
-        
+
         if (!inserted) {
             this.status = 409
             this.body   = { status: false, message: 'Leader Already registered' }
@@ -147,7 +147,7 @@ module.exports = {
         if (!replaced) {
             this.status = 203
             this.body   = { status: true, message: 'Invitation already removed, possibly race condition' }
-            return 
+            return
         }
 
         this.status = 200
@@ -279,7 +279,7 @@ module.exports = {
     },
     RefuseExchangeRequest: function* Handler_Leader_RefuseExchangeRequest() {
         const {mock, r} = this
-        
+
         ;( mock
          ? null
          : yield r.table('exchange').get(this.exchangeRequest.id).delete()
@@ -290,7 +290,7 @@ module.exports = {
     },
     AcceptExchangeRequest: function* Handler_Leader_AcceptExchangeRequest() {
         const {mock, r} = this
-        
+
         let {
             id,
             from,
@@ -320,7 +320,7 @@ module.exports = {
             return
         }
 
-        ;( mock 
+        ;( mock
          ? null
          : yield r.table('enroll').get(from)
                  .update({
@@ -331,7 +331,7 @@ module.exports = {
                  })
         )
 
-         ;( mock 
+         ;( mock
           ? null
           : yield r.table('enroll').get(to)
                   .update({

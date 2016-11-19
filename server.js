@@ -81,6 +81,10 @@ function createApp({
     leaders.post(  '/accommodation',                HasLeaderAccess, Handler.Accommodation.Post )
     leaders.get(   '/leader/billing',               HasLeaderAccess, Handler.Payment.Get )
     leaders.post(  '/payment',                      HasLeaderAccess, Handler.Payment.Post )
+    // Leader Stage-2
+    leaders.post(  '/accommodation2',               HasLeaderAccess, Handler.Accommodation2.Post )
+    leaders.get(   '/leader/billing2',              HasLeaderAccess, Handler.Payment2.Get )
+    leaders.post(  '/payment2',                     HasLeaderAccess, Handler.Payment2.Post )
 
     // Admin Router
     let admins = new Router()
@@ -89,20 +93,27 @@ function createApp({
     admins.get( '/enroll/:id',    HasAdminAccess, Handler.Enroll.GetId )
     admins.post('/enroll/:id',    HasAdminAccess, Handler.Enroll.PostId )
     admins.get( '/enroll/status', HasAdminAccess, Handler.Enroll.GetStatus )
+    admins.get( '/enroll/committee/:id', HasAdminAccess, Handler.Enroll.GetCommittee )
     admins.post('/action',        HasAdminAccess, Handler.Action.Post )
     admins.post('/invitation',    HasAdminAccess, Handler.Invitation.Post )
     admins.post('/pending',       HasAdminAccess, Handler.Pending.Post )
     admins.get( '/billing/:id',   HasAdminAccess, Handler.Payment.GetId )
-    admins.get( '/payment/:id',   HasAdminAccess, Handler.Payment.GetPaymentCredential )
-    admins.get( '/payment',       HasAdminAccess, Handler.Payment.GetList )
-    admins.post('/payment/:id',   HasAdminAccess, Handler.Payment.PostReview )
-    admins.get( '/enroll/committee/:id', HasAdminAccess, Handler.Enroll.GetCommittee )
     admins.get( '/accommodation/:id', HasAdminAccess, Handler.Accommodation.GetReservation )
+    admins.get( '/payment',       HasAdminAccess, Handler.Payment.GetList )
+    admins.get( '/payment/:id',   HasAdminAccess, Handler.Payment.GetPaymentCredential )
+    admins.post('/payment/:id',   HasAdminAccess, Handler.Payment.PostReview )
+    // Admin Stage-2
+    admins.post('/stage2',        HasAdminAccess, Handler.Invitation.PostStage2 )
+    admins.get( '/billing2/:id',  HasAdminAccess, Handler.Payment2.GetId )
+    admins.get( '/payment2',      HasAdminAccess, Handler.Payment2.GetList )
+    admins.get( '/payment2/:id',  HasAdminAccess, Handler.Payment2.GetPaymentCredential )
+    admins.post('/payment2/:id',  HasAdminAccess, Handler.Payment2.PostReview )
+    admins.get( '/accommodation2/:id', HasAdminAccess, Handler.Accommodation2.GetReservation )
 
     app.use( publics.routes() )
     app.use( Handler.Login.Router )
     app.use( leaders.routes() )
-    app.use( admins.routes() ) 
+    app.use( admins.routes() )
 
     return app
 }

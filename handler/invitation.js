@@ -108,5 +108,23 @@ module.exports = {
 
         this.status = 400
         this.body   = { status: false, message: 'Current state can not be changed to inviting', state }
+    },
+    PostStage2: function*() {
+        const {mock, r} = this
+        const {id} = this.request.body
+
+        let {
+            replaced
+        } = mock
+          ? { replaced: 1 }
+          : yield r.table('enroll').get(id).update({ state: 'stage-2' })
+
+        if (replaced) {
+            this.status = 200
+            this.body = { status: true }
+        }else{
+            this.status = 500
+            this.body = { status: false, message: 'Internal Server Error'}
+        }
     }
 }

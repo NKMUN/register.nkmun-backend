@@ -4,20 +4,13 @@ const { MOCK_ACCOMMODATION } = require('../mock-data')
 const { isReservation } = require('./lib/schema')
 
 module.exports = {
-    Get: function* Handler_Get_Accommodation() {
-        const {mock, r} = this
-        this.status = 200
-        this.body = mock
-                  ? MOCK_ACCOMMODATION
-                  : yield r.table('accommodation').orderBy({index: 'id'}).pluck('id', 'name', 'type', 'stock')
-    },
     GetReservation: function* Handler_Get_Reservation() {
         const {mock, r} = this
         let schoolId = this.params.id
         this.status = 200
         this.body = mock
                   ? []
-                  : yield r.table('reservation').getAll(schoolId, {index: 'school'})
+                  : yield r.table('reservation2').getAll(schoolId, {index: 'school'})
                           .eqJoin('accommodation', r.db('nkmun').table('accommodation'))
                           .without({ left: ['accommodation'], right: ['id', 'quota', 'stock', 'price'] })
                           .zip()
@@ -28,17 +21,17 @@ module.exports = {
 
         // check school state is valid
         let currentState = mock
-                         ? 'quota-confirmed'
+                         ? 'stage-2'
                          : yield r.table('enroll').get(schoolId).default({}).getField('state')
 
-        if (currentState !== 'quota-confirmed') {
+        if (currentState !== 'stage-2') {
             this.status = 409
             this.body = { status: false, message: 'Invalid state to reserve accommodation' }
             return
         }
 
         // verify, aggregate
-        let reservations = (this.is('multipart') ? this.request.body.fields : this.request.body).reservations
+        let { reservations } = this.is('multipart') ? this.request.body.fields : this.request.body
         if ( ! reservations.every( isReservation ) ) {
             this.status = 400
             this.body = { status: false, message: 'Invalid reservations' }
@@ -87,12 +80,12 @@ module.exports = {
         }
 
         // batch insert into reservation table
-        let { inserted } = yield r.table('reservation').insert(
+        let { inserted } = yield r.table('reservation2').insert(
             reservations.map( ({id, checkIn, checkOut}) => ({accommodation: id, checkIn, checkOut, school: schoolId}) )
         )
 
         if (inserted === reservations.length) {
-            yield r.table('enroll').get(schoolId).update({ state: 'accommodation-confirmed' })
+            yield r.table('enroll').get(schoolId).update({ state: 'accommodation-confirmed-2' })
             this.status = 200
             this.body = { status: true, message: 'Accommodation Reserved' }
         } else {

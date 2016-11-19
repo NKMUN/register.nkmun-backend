@@ -38,7 +38,7 @@ module.exports = {
         } = mock
           ? {replaced: 1}
           : yield r.table('enroll').get(this.params.id).update(data)
-        
+
         if (replaced || unchanged) {
             this.status = 202
             this.body   = { status: true, message: 'updated' }
@@ -51,23 +51,24 @@ module.exports = {
         const {r, mock} = this
         const {id} = this.params
         const {committee} = this.query
-        const fields = ['id', 'school', 'quota', 'state', ... (committee ? ['committee'] : []) ]
         this.status = 200
         this.body   = mock
                     ? MOCK_ENROLL_LIST
                     : yield r.table('enroll')
                             .orderBy({index: r.desc('submission_time')})
-                            .pluck( ...fields )
+                            .pluck(
+                                'id', 'school', 'quota', 'state',
+                                ... ( committee ? ['committee', 'committee2'] : [] )
+                            )
     },
     GetStatus: function* Get_Enroll_Status() {
         const {r, mock} = this
         const {id} = this.params
-        const fields = ['id', 'school', 'state']
         this.status = 200
         this.body   = mock
                     ? MOCK_ENROLL_LIST
                     : yield r.table('enroll')
-                            .pluck( ...fields )
+                            .pluck( 'id', 'school', 'state' )
     },
     GetId: function* Get_Enroll_Id() {
         const {r, mock} = this
@@ -83,8 +84,8 @@ module.exports = {
         const {id} = this.params
         let entry = mock
                   ? {}
-                  : yield r.table('enroll').get(id).getField('committee')
+                  : yield r.table('enroll').get(id).default({}).pluck('committee', 'committee2')
         this.status = entry ? 200: 404
-        this.body = entry ? entry : []
-    }
+        this.body = entry ? entry : {committee: {}, committee2: {}}
+    },
 }

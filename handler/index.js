@@ -9,5 +9,7 @@ module.exports = {
     Pending: require('./pending'),
     Leader: require('./leader'),
     Accommodation: require('./accommodation'),
-    Payment: require('./payment')
+    Accommodation2: require('./accommodation2'),
+    Payment: require('./payment'),
+    Payment2: require('./payment2')
 }
