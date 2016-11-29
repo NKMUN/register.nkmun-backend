@@ -85,6 +85,7 @@ if (mock) {
         yield OP('payment',       r.tableCreate('payment'),       conn, 'tables_creared')
         yield OP('reservation2',  r.tableCreate('reservation2'),  conn, 'tables_created')
         yield OP('payment2',      r.tableCreate('payment2'),      conn, 'tables_created')
+        yield OP('representative',r.tableCreate('representative'),conn, 'tables_created')
 
         log('Creating secondary indexes')
         yield OP('enroll/submission_time', r.table('enroll').indexCreate('submission_time'), conn, 'created')
@@ -96,6 +97,8 @@ if (mock) {
         yield OP('reservation/accommodation',  r.table('reservation').indexCreate('accommodation'),  conn, 'created')
         yield OP('reservation2/school',        r.table('reservation2').indexCreate('school'),        conn, 'created')
         yield OP('reservation2/accommodation', r.table('reservation2').indexCreate('accommodation'), conn, 'created')
+        yield OP('representative/school',      r.table('representative').indexCreate('school'),      conn, 'created')
+        yield OP('representative/committee',   r.table('representative').indexCreate('committee'),   conn, 'created')
 
         log('Initialize Accommodation Entries')
         for (let entry of ACCOMMODATION)

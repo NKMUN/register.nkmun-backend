@@ -11,5 +11,6 @@ module.exports = {
     Accommodation: require('./accommodation'),
     Accommodation2: require('./accommodation2'),
     Payment: require('./payment'),
-    Payment2: require('./payment2')
+    Payment2: require('./payment2'),
+    Representative: require('./representative')
 }

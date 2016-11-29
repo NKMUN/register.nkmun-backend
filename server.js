@@ -85,6 +85,10 @@ function createApp({
     leaders.post(  '/accommodation2',               HasLeaderAccess, Handler.Accommodation2.Post )
     leaders.get(   '/leader/billing2',              HasLeaderAccess, Handler.Payment2.Get )
     leaders.post(  '/payment2',                     HasLeaderAccess, Handler.Payment2.Post )
+    // Pre Conference
+    leaders.get(   '/representative',      HasLeaderAccess, Handler.Representative.Get )
+    leaders.get(   '/representative/:id',  HasLeaderAccess, Handler.Representative.GetId )
+    leaders.post(  '/representative/:id',  HasLeaderAccess, Handler.Representative.PostId )
 
     // Admin Router
     let admins = new Router()
@@ -109,6 +113,8 @@ function createApp({
     admins.get( '/payment2/:id',  HasAdminAccess, Handler.Payment2.GetPaymentCredential )
     admins.post('/payment2/:id',  HasAdminAccess, Handler.Payment2.PostReview )
     admins.get( '/accommodation2/:id', HasAdminAccess, Handler.Accommodation2.GetReservation )
+    // Pre Conference
+    admins.post('/representative', HasAdminAccess, Handler.Representative.Post )
 
     app.use( publics.routes() )
     app.use( Handler.Login.Router )
