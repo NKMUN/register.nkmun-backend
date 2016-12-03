@@ -23,7 +23,8 @@ const REPR_POOL = {
     loc_en_5: 100,
     loc_media: 60,
     loc_observer: 40,
-    loc_superv: 60
+    loc_superv: 60,
+    loc_absent_leader: 200
 }
 
 program
@@ -48,6 +49,8 @@ co( function*() {
         port: dbPort,
         db:   dbName
     })
+
+    yield r.tableCreate('representative')
 
     let count = yield r.table('representative').count().run(conn)
 

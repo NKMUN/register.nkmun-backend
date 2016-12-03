@@ -30,9 +30,8 @@ module.exports = {
         let entries = []
 
         for (let k in committee) {
-            if (k === 'loc_absent_leader')
-                continue
             let {replaced} = yield r.table('representative').getAll(k, {index: 'committee'})
+                                   .filter( r.row('school').default(null).not() )
                                    .limit(committee[k]).update({ school })
             if (replaced !== committee[k]) {
                 this.status = 500

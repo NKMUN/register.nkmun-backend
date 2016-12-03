@@ -89,6 +89,9 @@ function createApp({
     leaders.get(   '/representative',      HasLeaderAccess, Handler.Representative.Get )
     leaders.get(   '/representative/:id',  HasLeaderAccess, Handler.Representative.GetId )
     leaders.post(  '/representative/:id',  HasLeaderAccess, Handler.Representative.PostId )
+    leaders.get(   '/reservation',         HasLeaderAccess, Handler.Accommodation.GetReservation )
+    leaders.get(   '/reservation2',        HasLeaderAccess, Handler.Accommodation.GetReservation )
+    leaders.post(  '/confirm',             HasLeaderAccess, Handler.Confirm.Post )
 
     // Admin Router
     let admins = new Router()

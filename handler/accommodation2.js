@@ -6,7 +6,7 @@ const { isReservation } = require('./lib/schema')
 module.exports = {
     GetReservation: function* Handler_Get_Reservation() {
         const {mock, r} = this
-        let schoolId = this.params.id
+        let schoolId = (this.params.id ? this.params.id : this.token.school) || ''
         this.status = 200
         this.body = mock
                   ? []
