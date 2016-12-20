@@ -1,5 +1,7 @@
 'use strict'
 
+const csvStringify = require('csv-stringify')
+
 const unique = (a) => [ ... new Set(a) ]
 const keys = Object.keys
 
@@ -97,6 +99,17 @@ module.exports = {
             yield r.table('representative').get(id).update(payload)
             this.status = 200
             this.body = { status: true }
+        }
+    },
+    DumpAll: function* GET_Representative_DumpAll() {
+        const {r, mock} = this
+
+        if (mock) {
+            this.status = 200
+            this.body = []
+        } else {
+            this.status = 200
+            this.body = yield r.table('representative').filter( r.row('school') )
         }
     }
 }

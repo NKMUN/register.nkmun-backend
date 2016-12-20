@@ -22,6 +22,16 @@ module.exports = {
                           .without({ left: ['accommodation'], right: ['id', 'quota', 'stock', 'price'] })
                           .zip()
     },
+    DumpAll: function* Handler_Accommodation_DumpAll() {
+        const {mock, r} = this
+        this.status = 200
+        this.body = mock
+                  ? []
+                  : yield r.table('reservation')
+                          .eqJoin('accommodation', r.db('nkmun').table('accommodation'))
+                          .without({ left: ['accommodation'], right: ['id', 'quota', 'stock', 'price'] })
+                          .zip()
+    },
     Post: function* Handler_Post_AccommodationReservation() {
         const {mock, r} = this
         const {school: schoolId} = this.token

@@ -90,7 +90,7 @@ function createApp({
     leaders.get(   '/representative/:id',  HasLeaderAccess, Handler.Representative.GetId )
     leaders.post(  '/representative/:id',  HasLeaderAccess, Handler.Representative.PostId )
     leaders.get(   '/reservation',         HasLeaderAccess, Handler.Accommodation.GetReservation )
-    leaders.get(   '/reservation2',        HasLeaderAccess, Handler.Accommodation.GetReservation )
+    leaders.get(   '/reservation2',        HasLeaderAccess, Handler.Accommodation2.GetReservation )
     leaders.post(  '/confirm',             HasLeaderAccess, Handler.Confirm.Post )
 
     // Admin Router
@@ -117,7 +117,10 @@ function createApp({
     admins.post('/payment2/:id',  HasAdminAccess, Handler.Payment2.PostReview )
     admins.get( '/accommodation2/:id', HasAdminAccess, Handler.Accommodation2.GetReservation )
     // Pre Conference
-    admins.post('/representative', HasAdminAccess, Handler.Representative.Post )
+    admins.post('/representative',      HasAdminAccess, Handler.Representative.Post )
+    admins.get( '/representative-list', HasAdminAccess, Handler.Representative.DumpAll )
+    admins.get( '/reservation-list',    HasAdminAccess, Handler.Accommodation.DumpAll )
+    admins.get( '/reservation2-list',   HasAdminAccess, Handler.Accommodation2.DumpAll )
 
     app.use( publics.routes() )
     app.use( Handler.Login.Router )
